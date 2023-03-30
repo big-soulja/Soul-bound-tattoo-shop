@@ -698,6 +698,9 @@
       let accounts, contract;
       const chainId = 11155111; // sepolia
       ethereum.on("chainChanged", (_chainId) => window.location.reload());
+      window.ethereum.on("accountsChanged", function (accounts) {
+        window.location.reload();
+      });
 
       const connectBtn = document.getElementById("connect");
       const mintBtn = document.getElementById("mintNFT");
@@ -752,6 +755,10 @@
 
       mintBtn.onclick = async () => {
         try {
+          if (window.ethereum.networkVersion !== chainId) {
+            writeAMessage("Please change your network to sepolia testnet");
+            return 0;
+          }
           const gasPrice = await ethereum.request({ method: "eth_gasPrice" });
           const gasEstimate = await contract.methods
             .claimAccess()
@@ -775,6 +782,10 @@
         const addressInQuestion = document.getElementById("address").value;
         console.log(contract);
         try {
+          if (window.ethereum.networkVersion !== chainId) {
+            writeAMessage("Please change your network to sepolia testnet");
+            return 0;
+          }
           const tx = {
             from: accounts[0],
             to: contractAddress,
@@ -922,3 +933,4 @@
     </script>
   </body>
 </html>
+
