@@ -709,6 +709,7 @@
       const status = document.getElementById("status");
 
       getTatBtn.style.display = "none";
+      grantBtn.style.display = "none";
       numberOfTattoos = 0;
 
       connectBtn.onclick = async () => {
@@ -754,50 +755,60 @@
       };
 
       mintBtn.onclick = async () => {
-        try {
-          if (window.ethereum.networkVersion !== chainId) {
-            writeAMessage("Please change your network to sepolia testnet");
-            return 0;
+        if (parseInt(window.ethereum.networkVersion) !== chainId) {
+          writeAMessage("Please change your network to sepolia testnet");
+          console.log(window.ethereum.networkVersion);
+          console.log(chainId);
+          return 0;
+        } else {
+          try {
+            const gasPrice = await ethereum.request({ method: "eth_gasPrice" });
+            const gasEstimate = await contract.methods
+              .claimAccess()
+              .estimateGas({ from: accounts[0] });
+            const tx = {
+              from: accounts[0],
+              to: contractAddress,
+              data: contract.methods.claimAccess().encodeABI(),
+            };
+            const txHash = await ethereum.request({
+              method: "eth_sendTransaction",
+              params: [tx],
+            });
+            status.innerHTML = `Minted successfully, transaction hash: ${txHash}`;
+          } catch (err) {
+            status.innerHTML = "Error minting NFT";
           }
-          const gasPrice = await ethereum.request({ method: "eth_gasPrice" });
-          const gasEstimate = await contract.methods
-            .claimAccess()
-            .estimateGas({ from: accounts[0] });
-          const tx = {
-            from: accounts[0],
-            to: contractAddress,
-            data: contract.methods.claimAccess().encodeABI(),
-          };
-          const txHash = await ethereum.request({
-            method: "eth_sendTransaction",
-            params: [tx],
-          });
-          status.innerHTML = `Minted successfully, transaction hash: ${txHash}`;
-        } catch (err) {
-          status.innerHTML = "Error minting NFT";
         }
       };
 
       grantBtn.onclick = async () => {
         const addressInQuestion = document.getElementById("address").value;
         console.log(contract);
-        try {
-          if (window.ethereum.networkVersion !== chainId) {
-            writeAMessage("Please change your network to sepolia testnet");
-            return 0;
+        if (parseInt(window.ethereum.networkVersion) !== chainId) {
+          writeAMessage("Please change your network to sepolia testnet");
+          console.log(window.ethereum.networkVersion);
+          console.log(chainId);
+          return 0;
+        } else {
+          try {
+            if (window.ethereum.networkVersion !== chainId) {
+              writeAMessage("Please change your network to sepolia testnet");
+              return 0;
+            }
+            const tx = {
+              from: accounts[0],
+              to: contractAddress,
+              data: contract.methods.grantAccess(addressInQuestion).encodeABI(),
+            };
+            const txHash = await ethereum.request({
+              method: "eth_sendTransaction",
+              params: [tx],
+            });
+            status.innerHTML = `Minted successfully, transaction hash: ${txHash}`;
+          } catch (err) {
+            status.innerHTML = "Error minting NFT";
           }
-          const tx = {
-            from: accounts[0],
-            to: contractAddress,
-            data: contract.methods.grantAccess(addressInQuestion).encodeABI(),
-          };
-          const txHash = await ethereum.request({
-            method: "eth_sendTransaction",
-            params: [tx],
-          });
-          status.innerHTML = `Minted successfully, transaction hash: ${txHash}`;
-        } catch (err) {
-          status.innerHTML = "Error minting NFT";
         }
       };
 
@@ -933,4 +944,3 @@
     </script>
   </body>
 </html>
-
